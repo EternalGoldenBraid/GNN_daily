@@ -23,6 +23,12 @@ class EventTagDataset(Dataset):
         with open('data/event_tag_graph.dat', 'rb') as f:
             features, edges = pickle.load(f)
 
+        if features['rating_sleep'].min() < 0:
+            features['rating_sleep'] += np.abs(features['rating_sleep'].min())
+        if features['rating_day'].min() < 0:
+            features['rating_day'] += np.abs(features['rating_day'].min())
+
+        self.dates = features['date']
         self.dates = features['date']
         features.drop('date', axis=1, inplace=True)
 
@@ -38,22 +44,21 @@ class EventTagDataset(Dataset):
 
         split = [0.7, 0.1, 0.2]
         train_idx = int(np.floor(split[0]*self.size))
-        val_idx = int(np.floor(split[1]*self.size))
+        val_idx = train_idx + int(np.floor(split[1]*self.size))
 
-        train_mask = torch.zeros(self.size, dtype=torch.long)
+        train_mask = torch.zeros(self.size, dtype=torch.bool)
         train_mask[perm[0:train_idx]] = 1
         self.data.train_mask = train_mask
 
-        val_mask = torch.zeros(self.size, dtype=torch.long)
+        val_mask = torch.zeros(self.size, dtype=torch.bool)
         val_mask[perm[train_idx:val_idx]] = 1
         self.data.val_mask = val_mask
 
-        test_mask = torch.zeros(self.size, dtype=torch.long)
-        test_mask[perm[val_idx:-1]] = 1
+        test_mask = torch.zeros(self.size, dtype=torch.bool)
+        test_mask[perm[val_idx:]] = 1
         self.data.test_mask = test_mask
 
         self.data.num_node_features = features.shape[1]
-
 
     def _download(self):
         return
