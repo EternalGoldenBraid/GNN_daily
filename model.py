@@ -1,5 +1,6 @@
 import torch
 from torch import Tensor
+import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 import torch.nn as nn
 
@@ -22,7 +23,8 @@ class Model(nn.Module):
         #x = x.to(device)
         x = self.conv1(x, edge_index).relu()
         x = self.conv2(x, edge_index)
-        return x
+        return F.log_softmax(x,dim=1)
+        #return x
 
     def forward1(self, x: Tensor, edge_index:Tensor, device,
             return_graph_embedding=False):
