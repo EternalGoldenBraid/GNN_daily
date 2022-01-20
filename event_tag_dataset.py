@@ -1,26 +1,27 @@
 import torch
 import pandas as pd
 import numpy as np
-#from torch_geometric.data import InMemoryDataset
-from torch_geometric.data import Dataset, Data
-#from sklearn.model_selection import train_test_split
+from torch_geometric.data import Dataset, Data, InMemoryDataset
 #import torch_geometric.transforms as T
 
 import os
 import pickle
 
 # custom dataset
-class EventTagDataset(Dataset):
+#class EventTagDataset(Dataset):
+class EventTagDataset(InMemoryDataset):
     def __init__(self, transform=None, pre_transform=None):
         super().__init__(None, transform, pre_transform)
         self.data = Data()
         self.dates = None
         self.size =  None
-        self.target = 'rating_sleep'
+        #self.target = 'rating_sleep'
+        self.target = 'rating_day'
 
         # Load data
         # features: pandas.df, Edges: np.array
-        with open('data/event_tag_graph.dat', 'rb') as f:
+        #with open('data/event_tag_graph.dat', 'rb') as f:
+        with open('event_tag_graph.dat', 'rb') as f:
             features, edges = pickle.load(f)
 
         if features['rating_sleep'].min() < 0:
@@ -40,30 +41,44 @@ class EventTagDataset(Dataset):
 
         self.size = features.shape[0]
 
-        perm = torch.randperm(self.size)
+        shuffle = False
+        if shuffle:
+            perm = torch.randperm(self.size)
+        else:
+            perm = list(range(self.size))
 
-        split = [0.7, 0.1, 0.2]
-        train_idx = int(np.floor(split[0]*self.size))
-        val_idx = train_idx + int(np.floor(split[1]*self.size))
+        cross_val = False
+        if cross_val:
+            split = [0.7, 0.1, 0.2]
+            train_idx = int(np.floor(split[0]*self.size))
+            val_idx = train_idx + int(np.floor(split[1]*self.size))
 
-        train_mask = torch.zeros(self.size, dtype=torch.bool)
-        train_mask[perm[0:train_idx]] = 1
-        self.data.train_mask = train_mask
+            train_mask = torch.zeros(self.size, dtype=torch.bool)
+            train_mask[perm[0:train_idx]] = 1
+            self.data.train_mask = train_mask
 
-        val_mask = torch.zeros(self.size, dtype=torch.bool)
-        val_mask[perm[train_idx:val_idx]] = 1
-        self.data.val_mask = val_mask
+            val_mask = torch.zeros(self.size, dtype=torch.bool)
+            val_mask[perm[train_idx:val_idx]] = 1
+            self.data.val_mask = val_mask
 
-        test_mask = torch.zeros(self.size, dtype=torch.bool)
-        test_mask[perm[val_idx:]] = 1
-        self.data.test_mask = test_mask
+            test_mask = torch.zeros(self.size, dtype=torch.bool)
+            test_mask[perm[val_idx:]] = 1
+            self.data.test_mask = test_mask
+        else:
+            split = 0.7
+            train_idx = int(np.floor(split*self.size))
+
+            train_mask = torch.zeros(self.size, dtype=torch.bool)
+            train_mask[perm[0:train_idx]] = 1
+            self.data.train_mask = train_mask
+
+            test_mask = torch.zeros(self.size, dtype=torch.bool)
+            test_mask[perm[train_idx:]] = 1
+            self.data.test_mask = test_mask
 
         self.data.num_node_features = features.shape[1]
 
     def _download(self):
-        return
-
-    def load_data(self, target='rating_sleep'):
         return
 
     def _process(self):

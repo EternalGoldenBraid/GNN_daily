@@ -1,0 +1,21 @@
+- model: GNN
+  operations:
+    train:
+      main: main
+      flags:
+        epochs: 200
+        learning_rate: 0.001
+        batch_size: 1024
+        loss: "adam"
+        input_channels: 2
+        hidden_channels: 16
+        out_channels: 8
+        model: 'shallow'
+
+      requires:
+        #- file: data/event_tag_graph.dat
+        - file: event_tag_graph.dat
+      output-scalars: 
+        - step: 'epoch: (\value)'
+        - loss: 'loss: (\value)'
+        - accuracy: 'accuracy: (\value)'
