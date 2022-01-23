@@ -6,31 +6,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from model import ModelShallow, ModelDeep
+from model_GAT import GATModel
 from k_CV import k_fold
 from train import train
 
 from event_tag_dataset import EventTagDataset
 
-ds = EventTagDataset()
+### Hyperparameters
+
+# Data
+shuffle = False
+target = 'rating_sleep'
+#target = 'rating_day'
+ds = EventTagDataset(shuffle=shuffle, target=target)
 #batch_size=32
 #loader = DataLoader(ds, batch_size=batch_size, shuffle=False)
 
 # Model
-input_channels = 2
+input_channels = (ds.data.x.shape[1])
 hidden_channels = 32
-out_channels = 6
+out_channels = 5
 save_model = False
-model = 'shallow'
-if model == 'shallow':
-    model = ModelShallow(input_channels, hidden_channels, out_channels)
-else:
-    model = ModelDeep(input_channels, hidden_channels, out_channels)
-
-lr = 0.001
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
+model = 'GAT'
+heads = 1
+dropout = 0.2
+# Optimizer
+lr = 0.01
+# Training
+epochs = 2000
 # K-fold validation
 #k = 5
+
+if model == 'GCN_shallow':
+    model = ModelShallow(input_channels, hidden_channels, out_channels)
+elif model == 'GCN_deep':
+    model = ModelDeep(input_channels, hidden_channels, out_channels)
+elif model == 'GAT':
+    model = GATModel(input_channels, hidden_channels, out_channels, heads=heads, dropout=dropout)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
 #results = {}
 #seed = 42
 #torch.manual_seed(seed)
@@ -43,7 +58,6 @@ model.to(device)
 ds.data.to(device)
 
 # Training
-epochs = 200
 model.train()
 train(model, ds, optimizer, epochs)
 

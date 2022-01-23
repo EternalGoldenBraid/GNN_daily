@@ -10,38 +10,39 @@ import pickle
 # custom dataset
 #class EventTagDataset(Dataset):
 class EventTagDataset(InMemoryDataset):
-    def __init__(self, transform=None, pre_transform=None):
+    def __init__(self, transform=None, pre_transform=None,
+            shuffle=False, target='rating_day'):
         super().__init__(None, transform, pre_transform)
         self.data = Data()
         self.dates = None
         self.size =  None
-        #self.target = 'rating_sleep'
-        self.target = 'rating_day'
+        self.target = target
+        self.shuffle = shuffle
 
         # Load data
         # features: pandas.df, Edges: np.array
-        #with open('data/event_tag_graph.dat', 'rb') as f:
+        # with open('data/event_tag_graph.dat', 'rb') as f:
         with open('event_tag_graph.dat', 'rb') as f:
-            features, edges = pickle.load(f)
+            features, edges, cross_edges = pickle.load(f)
 
         if features['rating_sleep'].min() < 0:
             features['rating_sleep'] += np.abs(features['rating_sleep'].min())
         if features['rating_day'].min() < 0:
             features['rating_day'] += np.abs(features['rating_day'].min())
 
-        self.dates = features['date']
-        self.dates = features['date']
-        features.drop('date', axis=1, inplace=True)
+        #self.dates = features['date']
+        #self.dates = dates
+        #features.drop('date', axis=1, inplace=True)
 
         self.data.y = torch.Tensor(features[self.target].values).long()
         features.drop(self.target, axis=1, inplace=True)
 
-        self.data.edge_index = torch.from_numpy(edges.T)
+        self.data.edge_index = torch.from_numpy(np.concatenate((edges.T, cross_edges.T),1))
+        #self.data.x = torch.Tensor(features.values).type(torch.long)
         self.data.x = torch.Tensor(features.values)
 
         self.size = features.shape[0]
 
-        shuffle = False
         if shuffle:
             perm = torch.randperm(self.size)
         else:

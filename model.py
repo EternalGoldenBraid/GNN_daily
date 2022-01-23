@@ -6,7 +6,7 @@ import torch.nn as nn
 
 #GCN models with 2 layers
 class ModelDeep(nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels,device='cpu'):
+    def __init__(self, in_channels, hidden_channels, out_channels):
         super(ModelDeep, self).__init__()
         self.conv1 = GCNConv(in_channels, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, out_channels)
@@ -37,7 +37,7 @@ class ModelDeep(nn.Module):
                 layer.reset_parameters()
 
 class ModelShallow(nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels,device='cpu'):
+    def __init__(self, in_channels, hidden_channels, out_channels):
         super(ModelShallow, self).__init__()
         self.conv1 = GCNConv(in_channels, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, out_channels)
