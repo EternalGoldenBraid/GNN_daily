@@ -9,5 +9,5 @@
 #guild run GNN:train epochs=[200,2000] learning_rate=[0.001] \
 #  hidden_channels=[32,64,128] model=['deep'] out_channels=[9,32,64] target=['rating_sleep']
 
-guild run GNN:train epochs=[200,2000,20000] learning_rate=[0.001,0.0001] \
-  hidden_channels=[32,128] model=['deep'] out_channels=[8,64] target=['rating_sleep']
+guild run GNN:train_gcn epochs=[50000] learning_rate=[0.001] \
+  hidden_channels=[128] model=['deep'] out_channels=[64] target=['rating_sleep']

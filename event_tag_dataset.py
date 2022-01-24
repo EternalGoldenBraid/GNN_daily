@@ -18,6 +18,7 @@ class EventTagDataset(InMemoryDataset):
         self.size =  None
         self.target = target
         self.shuffle = shuffle
+        self.feature_df = None
 
         # Load data
         # features: pandas.df, Edges: np.array
@@ -25,6 +26,7 @@ class EventTagDataset(InMemoryDataset):
         with open('event_tag_graph.dat', 'rb') as f:
             features, edges, cross_edges = pickle.load(f)
 
+        self.feature_df = features.copy()
         if features['rating_sleep'].min() < 0:
             features['rating_sleep'] += np.abs(features['rating_sleep'].min())
         if features['rating_day'].min() < 0:

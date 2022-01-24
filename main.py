@@ -27,7 +27,7 @@ input_channels = (ds.data.x.shape[1])
 hidden_channels = 32
 out_channels = 5
 save_model = False
-model = 'GAT'
+model_name = 'GAT'
 heads = 1
 dropout = 0.2
 # Optimizer
@@ -37,11 +37,11 @@ epochs = 2000
 # K-fold validation
 #k = 5
 
-if model == 'GCN_shallow':
+if model_name == 'GCN_shallow':
     model = ModelShallow(input_channels, hidden_channels, out_channels)
-elif model == 'GCN_deep':
+elif model_name == 'GCN_deep':
     model = ModelDeep(input_channels, hidden_channels, out_channels)
-elif model == 'GAT':
+elif model_name == 'GAT':
     model = GATModel(input_channels, hidden_channels, out_channels, heads=heads, dropout=dropout)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
